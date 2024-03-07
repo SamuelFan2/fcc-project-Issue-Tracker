@@ -9,6 +9,10 @@ require('dotenv').config();
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
+const test              = require('mongodb');
+const { MongoClient }   = require('mongodb');
+const { ObjectID }      = require('mongodb');
+const myDB              = new MongoClient(process.env.URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 let app = express();
 
@@ -37,7 +41,10 @@ app.route('/')
 fccTestingRoutes(app);
 
 //Routing for API 
-apiRoutes(app);  
+
+myDB.connect()
+    .then(apiRoutes(app, myDB))
+    .catch(err => console.log(err));
     
 //404 Not Found Middleware
 app.use(function(req, res, next) {
